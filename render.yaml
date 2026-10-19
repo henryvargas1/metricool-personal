@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: metricool-personal
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: CRON_SECRET
+        generateValue: true
+      - key: BASE_URL
+        value: https://metricool-personal.onrender.com
+      - key: DATABASE_URL
+        value: sqlite:////app/data/metricool.db

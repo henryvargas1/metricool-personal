@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  metricool:
+    build: .
+    container_name: metricool-personal
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - PORT=8000
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metricool Personal | Programador Multi-Cuenta</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        },
+                        yt: '#ff0000',
+                        ig: '#e1306c',
+                        tt: '#00f2fe'
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Bar -->
+    <header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-share-nodes text-white text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-lg text-white tracking-tight">Metricool <span class="text-indigo-400">Personal</span></span>
+                        <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Pro</span>
+                    </div>
+                    <p class="text-xs text-slate-400 hidden sm:block">YouTube • Instagram Reels • TikTok Multi-Cuenta</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Status Badge -->
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span class="font-medium">Motor Activo (60s)</span>
+                </div>
+
+                <!-- Force Cron Trigger Button -->
+                <button onclick="triggerCronManually()" title="Disparar revisión de publicaciones inmediatamente" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <span class="hidden sm:inline">Ejecutar Cola Ya</span>
+                </button>
+
+                <!-- Documentation Link -->
+                <a href="/docs" target="_blank" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-xs transition" title="Ver Swagger API Docs">
+                    <i class="fa-solid fa-book"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+        <!-- Metrics Bar -->
+        <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+                    <span>Cuentas</span>
+                    <i class="fa-solid fa-users text-indigo-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-white" id="statAccounts">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Disponibles</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
+                    <span>Videos</span>
+                    <i class="fa-solid fa-video text-purple-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-white" id="statVideos">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Maestros</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-amber-400 text-xs font-medium">
+                    <span>Pendientes</span>
+                    <i class="fa-solid fa-clock text-amber-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-amber-300" id="statPending">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">En espera</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-cyan-400 text-xs font-medium">
+                    <span>Publicando</span>
+                    <i class="fa-solid fa-spinner animate-spin text-cyan-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-cyan-300" id="statPublishing">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Transfiriendo</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-emerald-400 text-xs font-medium">
+                    <span>Publicados</span>
+                    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-emerald-300" id="statPublished">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Exitosos</div>
+            </div>
+
+            <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between text-rose-400 text-xs font-medium">
+                    <span>Fallidos</span>
+                    <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                </div>
+                <div class="mt-2 text-2xl font-bold text-rose-300" id="statFailed">0</div>
+                <div class="text-[11px] text-slate-500 mt-0.5">Requieren reintento</div>
+            </div>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <nav class="flex border-b border-slate-800 gap-2 sm:gap-6 overflow-x-auto pb-px">
+            <button onclick="switchTab('tab-schedule')" id="btnTabSchedule" class="tab-btn px-4 py-3 text-sm font-semibold border-b-2 border-indigo-500 text-indigo-400 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span>Programar Video</span>
+            </button>
+            <button onclick="switchTab('tab-monitor')" id="btnTabMonitor" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Monitor de Publicaciones</span>
+            </button>
+            <button onclick="switchTab('tab-accounts')" id="btnTabAccounts" class="tab-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-solid fa-users-gear"></i>
+                <span>Cuentas Conectadas</span>
+            </button>
+        </nav>
+
+        <!-- ==================== TAB 1: PROGRAMAR VIDEO ==================== -->
+        <div id="tab-schedule" class="space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- Columna Izquierda: Video Maestro & Cuentas (5 cols) -->
+                <div class="lg:col-span-5 space-y-6">
+                    
+                    <!-- 1. Carga de Video Maestro -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold">1</span>
+                                Video Maestro
+                            </h2>
+                            <span class="text-xs text-slate-400">MP4, MOV, WebM</span>
+                        </div>
+
+                        <!-- Dropzone -->
+                        <div id="dropzone" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 bg-slate-950/60 rounded-xl p-6 text-center cursor-pointer transition">
+                            <input type="file" id="videoFileInput" accept=".mp4,.mov,.webm,.m4v" class="hidden">
+                            <div id="dropzoneEmpty" class="space-y-2">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-400"></i>
+                                <p class="text-sm font-medium text-slate-200">Arrastra tu video aquí o <span class="text-indigo-400 underline">examina</span></p>
+                                <p class="text-xs text-slate-500">Un solo archivo para YouTube, Reels y TikTok</p>
+                            </div>
+
+                            <!-- Upload Progress -->
+                            <div id="uploadProgressContainer" class="hidden space-y-2 py-2">
+                                <div class="flex justify-between text-xs text-slate-300">
+                                    <span id="uploadStatusText">Subiendo video maestro...</span>
+                                    <span id="uploadPercentText">0%</span>
+                                </div>
+                                <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                                    <div id="uploadProgressBar" class="bg-indigo-500 h-2 transition-all duration-200" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Video Preview Player -->
+                        <div id="videoPreviewWrapper" class="hidden space-y-2">
+                            <div class="relative rounded-xl overflow-hidden bg-black aspect-video flex items-center justify-center border border-slate-800">
+                                <video id="previewPlayer" controls class="max-h-full max-w-full rounded-lg"></video>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+                                <span id="previewVideoName" class="font-medium truncate max-w-[200px]">video.mp4</span>
+                                <span id="previewVideoSize">0 MB</span>
+                                <button onclick="removeSelectedVideo()" class="text-rose-400 hover:text-rose-300 font-semibold">Cambiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Selección de Cuentas Destino -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold">2</span>
+                                Cuentas Destino
+                            </h2>
+                            <span class="text-xs text-slate-400" id="selectedCountBadge">0 seleccionadas</span>
+                        </div>
+
+                        <!-- Filtros rápidos de selección -->
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            <button onclick="selectAllAccounts(true)" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Todas</button>
+                            <button onclick="selectPlatformAccounts('youtube')" class="px-2.5 py-1 rounded-md bg-red-500/10 hover:bg-red-500/20 text-red-400 transition">Solo YouTube</button>
+                            <button onclick="selectPlatformAccounts('instagram')" class="px-2.5 py-1 rounded-md bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 transition">Solo Reels</button>
+                            <button onclick="selectPlatformAccounts('tiktok')" class="px-2.5 py-1 rounded-md bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 transition">Solo TikTok</button>
+                            <button onclick="selectAllAccounts(false)" class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-400 transition">Ninguna</button>
+                        </div>
+
+                        <!-- Lista de cuentas con checkboxes -->
+                        <div id="accountsCheckboxList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                            <div class="text-center py-6 text-slate-500 text-sm">
+                                Cargando cuentas...
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Columna Derecha: Matriz de Copys y Horarios (7 cols) -->
+                <div class="lg:col-span-7 space-y-6">
+                    
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-5">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-indigo-500/20 text-indigo-400 text-xs flex items-center justify-center font-bold">3</span>
+                                Matriz de Copys y Horario
+                            </h2>
+                            <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">Global + Personalizable</span>
+                        </div>
+
+                        <!-- Campos Globales -->
+                        <div class="space-y-4 bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                    Título Global <span class="text-slate-500 font-normal">(Requerido para YouTube, opcional en Reels/TikTok)</span>
+                                </label>
+                                <input type="text" id="globalTitle" placeholder="Ej: 5 Herramientas de IA que transformarán tu 2026" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                    Descripción / Pie de Video Global
+                                </label>
+                                <textarea id="globalDescription" rows="4" placeholder="Escribe aquí el texto principal de tu publicación..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">
+                                    Hashtags Globales
+                                </label>
+                                <input type="text" id="globalHashtags" placeholder="#inteligenciaartificial #productividad #creadores" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-1">Fecha y Hora Programada</label>
+                                    <input type="datetime-local" id="globalScheduledTime" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-indigo-500">
+                                </div>
+                                <div class="flex items-end">
+                                    <button onclick="setScheduledTimeNow()" class="w-full py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition flex items-center justify-center gap-1.5 h-[38px]">
+                                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                                        <span>Publicar de Inmediato (Ahora)</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Interruptor de Personalización Individual -->
+                        <div class="border-t border-slate-800 pt-4">
+                            <div class="flex items-center justify-between cursor-pointer" onclick="toggleCustomMatrix()">
+                                <div>
+                                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
+                                        <i class="fa-solid fa-sliders text-indigo-400"></i>
+                                        Personalizar Copys por Cuenta Específica
+                                    </h3>
+                                    <p class="text-xs text-slate-400 mt-0.5">Sobrescribe el título, hashtags o descripción para perfiles individuales</p>
+                                </div>
+                                <div class="w-10 h-6 bg-slate-800 rounded-full flex items-center p-1 cursor-pointer transition" id="customMatrixToggle">
+                                    <div class="w-4 h-4 bg-slate-400 rounded-full transition transform" id="customMatrixDot"></div>
+                                </div>
+                            </div>
+
+                            <!-- Contenedor dinámico de personalización individual -->
+                            <div id="customMatrixContainer" class="hidden mt-4 space-y-4">
+                                <div id="customMatrixCards" class="space-y-4 max-h-96 overflow-y-auto pr-1">
+                                    <!-- Renderizado dinámico de tarjetas por cuenta seleccionada -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Envío -->
+                        <div class="pt-2">
+                            <button onclick="submitBatchSchedule()" id="btnSubmitSchedule" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-rocket"></i>
+                                <span>Programar Publicación en Cuentas Seleccionadas</span>
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ==================== TAB 2: MONITOR DE PUBLICACIONES ==================== -->
+        <div id="tab-monitor" class="hidden space-y-4">
+            
+            <!-- Barra de Filtros y Búsqueda -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Filtrar por:</span>
+                    <button onclick="filterPosts('status', '')" class="status-filter-btn active px-3 py-1.5 rounded-lg text-xs font-medium bg-indigo-600 text-white transition">Todos</button>
+                    <button onclick="filterPosts('status', 'PENDING')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-amber-300 transition">Pendientes</button>
+                    <button onclick="filterPosts('status', 'PUBLISHING')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-cyan-300 transition">Publicando</button>
+                    <button onclick="filterPosts('status', 'PUBLISHED')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-emerald-300 transition">Publicados</button>
+                    <button onclick="filterPosts('status', 'FAILED')" class="status-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-rose-300 transition">Fallidos</button>
+                </div>
+
+                <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <select id="platformFilterSelect" onchange="filterPosts('platform', this.value)" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500">
+                        <option value="">Todas las Redes</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="tiktok">TikTok</option>
+                    </select>
+
+                    <button onclick="loadScheduledPosts()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs flex items-center gap-1.5 border border-slate-700 transition">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Actualizar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla de Publicaciones -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950/60 text-xs uppercase text-slate-400 font-semibold border-b border-slate-800">
+                            <tr>
+                                <th class="px-4 py-3.5">Plataforma & Cuenta</th>
+                                <th class="px-4 py-3.5">Video Maestro</th>
+                                <th class="px-4 py-3.5">Título / Copy</th>
+                                <th class="px-4 py-3.5">Fecha Programada</th>
+                                <th class="px-4 py-3.5">Estado</th>
+                                <th class="px-4 py-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postsTableBody" class="divide-y divide-slate-800/60">
+                            <tr>
+                                <td colspan="6" class="px-4 py-8 text-center text-slate-500">
+                                    Cargando publicaciones...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ==================== TAB 3: GESTOR DE CUENTAS ==================== -->
+        <div id="tab-accounts" class="hidden space-y-6">
+            
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-base font-semibold text-white">Cuentas Sociales Conectadas (~10 Cuentas)</h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Gestiona tus canales de YouTube, cuentas de Instagram Reels y perfiles de TikTok.</p>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openOAuthConnectModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs shadow-md shadow-indigo-600/20 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Vincular por OAuth</span>
+                    </button>
+                    <button onclick="openManualAccountModal()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-key"></i>
+                        <span>Añadir Token Manual</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Cuentas -->
+            <div id="accountsCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-full py-10 text-center text-slate-500">
+                    Cargando cuentas registradas...
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/80 bg-slate-950 py-4 text-center text-xs text-slate-500">
+        Metricool Personal • Desarrollado para uso propio • Alojamiento compatible con Render + cron-job.org
+    </footer>
+
+    <!-- ==================== MODALES ==================== -->
+
+    <!-- Modal Detalle de Error -->
+    <div id="errorDetailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-rose-400 font-semibold text-base">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Detalle del Error de Publicación</span>
+                </div>
+                <button onclick="closeErrorModal()" class="text-slate-400 hover:text-slate-200 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                <pre id="errorModalContent" class="text-xs text-rose-300 font-mono whitespace-pre-wrap break-all max-h-60 overflow-y-auto"></pre>
+            </div>
+
+            <div class="text-xs text-slate-400 space-y-1 bg-slate-800/40 p-3 rounded-lg border border-slate-700/50">
+                <p class="font-semibold text-slate-300">💡 Sugerencias comunes:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-slate-400">
+                    <li>Verifica que el token de la cuenta no haya expirado.</li>
+                    <li>Revisa que el archivo cumpla las dimensiones recomendadas (1080x1920 para Reels/TikTok).</li>
+                    <li>Comprueba que no se haya superado la cuota diaria de la API oficial.</li>
+                </ul>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeErrorModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">Cerrar</button>
+                <button id="btnRetryFromModal" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Reintentar Publicación</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Vincular Cuenta por OAuth -->
+    <div id="oauthConnectModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-white">Vincular Nueva Cuenta</h3>
+                <button onclick="closeOAuthModal()" class="text-slate-400 hover:text-slate-200 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-400">Selecciona la plataforma con la que deseas iniciar sesión oficial para autorizar permisos de publicación:</p>
+
+            <div class="space-y-3">
+                <button onclick="startOAuthFlow('youtube')" class="w-full p-3.5 rounded-xl bg-red-600/10 hover:bg-red-600/20 border border-red-500/30 text-white text-sm font-semibold flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-youtube text-red-500 text-xl"></i>
+                        <span>Conectar Canal de YouTube</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="startOAuthFlow('meta')" class="w-full p-3.5 rounded-xl bg-pink-600/10 hover:bg-pink-600/20 border border-pink-500/30 text-white text-sm font-semibold flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-instagram text-pink-500 text-xl"></i>
+                        <span>Conectar Instagram Reels</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400"></i>
+                </button>
+
+                <button onclick="startOAuthFlow('tiktok')" class="w-full p-3.5 rounded-xl bg-cyan-600/10 hover:bg-cyan-600/20 border border-cyan-500/30 text-white text-sm font-semibold flex items-center justify-between transition">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-brands fa-tiktok text-cyan-400 text-xl"></i>
+                        <span>Conectar Perfil de TikTok</span>
+                    </div>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400"></i>
+                </button>
+            </div>
+
+            <p class="text-[11px] text-slate-500 text-center">Requiere que hayas configurado los Client IDs en tu archivo .env</p>
+        </div>
+    </div>
+
+    <!-- Modal Añadir Token Manual -->
+    <div id="manualAccountModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex items-center justify-between">
+                <h3 class="text-base font-semibold text-white">Registrar Cuenta con Token Directo</h3>
+                <button onclick="closeManualAccountModal()" class="text-slate-400 hover:text-slate-200 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Plataforma</label>
+                    <select id="manualPlatform" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                        <option value="youtube">YouTube</option>
+                        <option value="instagram">Instagram (Reels)</option>
+                        <option value="tiktok">TikTok</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Nombre o Alias de la Cuenta</label>
+                    <input type="text" id="manualAccountName" placeholder="ej: @mi_marca_reels" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">ID de Usuario / Canal en la Plataforma</label>
+                    <input type="text" id="manualUserId" placeholder="ej: IG Business Account ID o Channel ID" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Access Token</label>
+                    <textarea id="manualAccessToken" rows="3" placeholder="Pega aquí el token de acceso..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono text-[11px]"></textarea>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-300 mb-1">Refresh Token (Opcional)</label>
+                    <input type="text" id="manualRefreshToken" placeholder="Opcional para YouTube/TikTok" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2.5 text-slate-200 font-mono text-[11px]">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 pt-2">
+                <button onclick="closeManualAccountModal()" class="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium">Cancelar</button>
+                <button onclick="saveManualAccount()" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold">Guardar Cuenta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 max-w-sm bg-slate-900 border border-slate-700 text-slate-200 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+        <div id="toastMessage" class="text-xs font-medium">Operación exitosa</div>
+    </div>
+
+    <!-- Vanilla JavaScript Application Logic -->
+    <script src="/static/app.js"></script>
+</body>
+</html>
