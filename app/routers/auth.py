@@ -1,3 +1,4 @@
+from typing import Optional
 import urllib.parse
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -30,8 +31,10 @@ def get_youtube_auth_url():
 
 
 @router.get("/youtube/callback")
-def youtube_callback(code: str = Query(...), db: Session = Depends(get_db)):
+def youtube_callback(code: Optional[str] = Query(None), error: Optional[str] = Query(None), db: Session = Depends(get_db)):
     """Intercambia el código por tokens y registra el canal de YouTube en la BD."""
+    if not code:
+        return RedirectResponse(url="/")
     token_url = "https://oauth2.googleapis.com/token"
     token_data = {
         "code": code,
@@ -110,8 +113,16 @@ def get_meta_auth_url():
 
 
 @router.get("/meta/callback")
-def meta_callback(code: str = Query(...), db: Session = Depends(get_db)):
+def meta_callback(
+    code: Optional[str] = Query(None),
+    error: Optional[str] = Query(None),
+    error_description: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
     """Intercambia código por token de larga duración y vincula cuentas de Instagram."""
+    if not code:
+        return RedirectResponse(url="/")
+
     token_url = "https://graph.facebook.com/v19.0/oauth/access_token"
     params = {
         "client_id": settings.META_APP_ID,
@@ -195,8 +206,15 @@ def get_tiktok_auth_url():
 
 
 @router.get("/tiktok/callback")
-def tiktok_callback(code: str = Query(...), db: Session = Depends(get_db)):
+def tiktok_callback(
+    code: Optional[str] = Query(None),
+    error: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
     """Intercambia código por token y vincula perfil de TikTok."""
+    if not code:
+        return RedirectResponse(url="/")
+
     token_url = "https://open.tiktokapis.com/v2/oauth/token/"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     data = {
