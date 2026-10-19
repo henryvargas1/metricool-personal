@@ -1,0 +1,13 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+*.log
+data/metricool.db
+uploads/*
+!uploads/.gitkeep
+!data/.gitkeep
+.env
